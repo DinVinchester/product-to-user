@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<modification>
+    <name>Product to user relationship</name>
+    <code>product_to_user_relationship</code>
+    <version>1.0</version>
+    <author>Ufo-engineering</author>
+    <link>https://ufo-engineering.com/</link>
+
+    <file path="admin/controller/catalog/product.php">
+        <operation>
+            <search><![CDATA[
+            $product_total = $this->model_catalog_product->getTotalProducts
+            ]]></search>
+
+            <add position="before"><![CDATA[
+                if ($this->user->getGroupId() != 1) {
+        			$filter_data['filter_user_id'] = $this->user->getId();
+        		}
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/model/catalog/product.php">
+        <operation>
+            <search><![CDATA[if (!empty($data['filter_name']))]]></search>
+            <add position="before"><![CDATA[
+                if (isset($data['filter_user_id']) && $data['filter_user_id'] !== '') {
+        			$sql .= " AND p.user_id = '" . (int)$data['filter_user_id'] . "'";
+        		}
+            ]]></add>
+        </operation>
+    </file>
+
+    <file path="admin/model/catalog/product.php">
+        <operation>
+            <search><![CDATA[$this->db->query("INSERT INTO " . DB_PREFIX . "product SET]]></search>
+            <add position="replace"><![CDATA[
+                $this->db->query("INSERT INTO " . DB_PREFIX . "product SET user_id = '" . (int)$this->user->getId() . "',
+            ]]></add>
+        </operation>
+    </file>
+</modification>
